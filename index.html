@@ -1,131 +1,203 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Simple E-Commerce Demo</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Upgraded E-Commerce Demo</title>
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background: #f4f4f4;
-    }
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: linear-gradient(135deg, #f4f4f4, #e9ecef);
+  }
 
-    header {
-      background: #111;
-      color: white;
-      padding: 15px;
-      text-align: center;
-    }
+  header {
+    background: #111;
+    color: white;
+    padding: 15px;
+    text-align: center;
+    font-size: 20px;
+    letter-spacing: 1px;
+  }
 
-    .container {
-      display: flex;
-      padding: 20px;
-      gap: 20px;
-    }
+  .search-bar {
+    padding: 10px;
+    text-align: center;
+    background: #fff;
+  }
 
-    .products {
-      flex: 3;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-    }
+  .search-bar input {
+    width: 60%;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    outline: none;
+  }
 
-    .card {
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-      text-align: center;
-    }
+  .container {
+    display: flex;
+    padding: 20px;
+    gap: 20px;
+  }
 
-    .card img {
-      width: 100%;
-      height: 150px;
-      object-fit: cover;
-      border-radius: 8px;
-    }
+  .products {
+    flex: 3;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+  }
 
-    .card button {
-      margin-top: 10px;
-      padding: 8px;
-      width: 100%;
-      background: green;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
+  .card {
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: 0.3s;
+  }
 
-    .cart {
-      flex: 1;
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      height: fit-content;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
+  .card:hover {
+    transform: translateY(-5px);
+  }
 
-    .cart-item {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      border-bottom: 1px solid #ddd;
-      padding-bottom: 5px;
-    }
+  .card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 10px;
+  }
 
-    .remove {
-      color: red;
-      cursor: pointer;
-    }
+  .card button {
+    margin-top: 10px;
+    padding: 10px;
+    width: 100%;
+    background: linear-gradient(45deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    font-weight: bold;
+  }
 
-    .total {
-      font-weight: bold;
-      margin-top: 10px;
-    }
-  </style>
+  .cart {
+    flex: 1;
+    background: white;
+    padding: 15px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    height: fit-content;
+    position: sticky;
+    top: 10px;
+  }
+
+  .cart-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+  }
+
+  .remove {
+    color: red;
+    cursor: pointer;
+  }
+
+  .qty-btn {
+    cursor: pointer;
+    padding: 2px 6px;
+    margin: 0 5px;
+    background: #eee;
+    border-radius: 4px;
+  }
+
+  .total {
+    font-weight: bold;
+    margin-top: 10px;
+  }
+
+  .clear-btn {
+    margin-top: 10px;
+    width: 100%;
+    padding: 8px;
+    background: crimson;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #111;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    display: none;
+  }
+</style>
 </head>
 
 <body>
 
-<header>
-  <h1>Simple E-Commerce Demo</h1>
-</header>
+<header>🛒 Upgraded E-Commerce Demo</header>
+
+<div class="search-bar">
+  <input type="text" id="search" placeholder="Search products..." oninput="renderProducts()" />
+</div>
 
 <div class="container">
 
-  <!-- Products -->
   <div class="products" id="productList"></div>
 
-  <!-- Cart -->
   <div class="cart">
     <h3>Cart</h3>
     <div id="cartItems"></div>
     <div class="total" id="totalPrice">Total: ₹0</div>
+    <button class="clear-btn" onclick="clearCart()">Clear Cart</button>
   </div>
 
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
-  // Demo product data
-  const products = [
-    { id: 1, name: "Shoes", price: 1200, img: "https://picsum.photos/200?1" },
-    { id: 2, name: "Watch", price: 2500, img: "https://picsum.photos/200?2" },
-    { id: 3, name: "Headphones", price: 1800, img: "https://picsum.photos/200?3" },
-    { id: 4, name: "Bag", price: 900, img: "https://picsum.photos/200?4" }
-  ];
+const products = [
+  { id: 1, name: "Shoes", price: 1200, img: "https://picsum.photos/200?1" },
+  { id: 2, name: "Watch", price: 2500, img: "https://picsum.photos/200?2" },
+  { id: 3, name: "Headphones", price: 1800, img: "https://picsum.photos/200?3" },
+  { id: 4, name: "Bag", price: 900, img: "https://picsum.photos/200?4" }
+];
 
-  let cart = [];
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-  const productList = document.getElementById("productList");
-  const cartItems = document.getElementById("cartItems");
-  const totalPrice = document.getElementById("totalPrice");
+const productList = document.getElementById("productList");
+const cartItems = document.getElementById("cartItems");
+const totalPrice = document.getElementById("totalPrice");
 
-  // Show products
-  function renderProducts() {
-    productList.innerHTML = "";
-    products.forEach(p => {
+function saveCart() {
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+// Toast
+function showToast(msg) {
+  const toast = document.getElementById("toast");
+  toast.innerText = msg;
+  toast.style.display = "block";
+  setTimeout(() => toast.style.display = "none", 1500);
+}
+
+// Render products
+function renderProducts() {
+  const search = document.getElementById("search").value.toLowerCase();
+  productList.innerHTML = "";
+
+  products
+    .filter(p => p.name.toLowerCase().includes(search))
+    .forEach(p => {
       productList.innerHTML += `
         <div class="card">
           <img src="${p.img}" />
@@ -135,41 +207,81 @@
         </div>
       `;
     });
+}
+
+// Add to cart (with quantity)
+function addToCart(id) {
+  const product = products.find(p => p.id === id);
+  const item = cart.find(c => c.id === id);
+
+  if (item) {
+    item.qty += 1;
+  } else {
+    cart.push({ ...product, qty: 1 });
   }
 
-  // Add to cart
-  function addToCart(id) {
-    const product = products.find(p => p.id === id);
-    cart.push(product);
-    renderCart();
+  saveCart();
+  renderCart();
+  showToast("Added to cart 🛒");
+}
+
+// Remove item
+function removeFromCart(id) {
+  cart = cart.filter(c => c.id !== id);
+  saveCart();
+  renderCart();
+}
+
+// Quantity update
+function changeQty(id, delta) {
+  const item = cart.find(c => c.id === id);
+  if (!item) return;
+
+  item.qty += delta;
+  if (item.qty <= 0) {
+    cart = cart.filter(c => c.id !== id);
   }
 
-  // Remove from cart
-  function removeFromCart(index) {
-    cart.splice(index, 1);
-    renderCart();
-  }
+  saveCart();
+  renderCart();
+}
 
-  // Render cart
-  function renderCart() {
-    cartItems.innerHTML = "";
-    let total = 0;
+// Clear cart
+function clearCart() {
+  cart = [];
+  saveCart();
+  renderCart();
+}
 
-    cart.forEach((item, index) => {
-      total += item.price;
+// Render cart
+function renderCart() {
+  cartItems.innerHTML = "";
+  let total = 0;
 
-      cartItems.innerHTML += `
-        <div class="cart-item">
-          <span>${item.name} - ₹${item.price}</span>
-          <span class="remove" onclick="removeFromCart(${index})">X</span>
+  cart.forEach(item => {
+    total += item.price * item.qty;
+
+    cartItems.innerHTML += `
+      <div class="cart-item">
+        <div>
+          ${item.name}<br/>
+          ₹${item.price} x ${item.qty}
         </div>
-      `;
-    });
 
-    totalPrice.innerText = "Total: ₹" + total;
-  }
+        <div>
+          <span class="qty-btn" onclick="changeQty(${item.id}, -1)">-</span>
+          <span class="qty-btn" onclick="changeQty(${item.id}, 1)">+</span>
+          <span class="remove" onclick="removeFromCart(${item.id})">X</span>
+        </div>
+      </div>
+    `;
+  });
 
-  renderProducts();
+  totalPrice.innerText = "Total: ₹" + total;
+}
+
+renderProducts();
+renderCart();
 </script>
 
 </body>
