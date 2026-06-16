@@ -3,38 +3,62 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Upgraded E-Commerce Demo</title>
+<title>Mini E-Commerce with Login</title>
 
 <style>
   body {
-    font-family: Arial, sans-serif;
     margin: 0;
-    background: linear-gradient(135deg, #f4f4f4, #e9ecef);
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #e3f2fd, #f8f9fa);
   }
 
+  /* HEADER */
   header {
     background: #111;
     color: white;
     padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .auth button {
+    padding: 8px 12px;
+    border: none;
+    cursor: pointer;
+    border-radius: 6px;
+    margin-left: 8px;
+  }
+
+  .login-btn { background: #28a745; color: white; }
+  .logout-btn { background: crimson; color: white; }
+
+  /* LOGIN MODAL */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+  }
+
+  .modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 300px;
     text-align: center;
-    font-size: 20px;
-    letter-spacing: 1px;
   }
 
-  .search-bar {
+  .modal input {
+    width: 90%;
     padding: 10px;
-    text-align: center;
-    background: #fff;
+    margin: 8px 0;
   }
 
-  .search-bar input {
-    width: 60%;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    outline: none;
-  }
-
+  /* LAYOUT */
   .container {
     display: flex;
     padding: 20px;
@@ -50,53 +74,50 @@
 
   .card {
     background: white;
-    padding: 15px;
     border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-    text-align: center;
+    padding: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     transition: 0.3s;
+    text-align: center;
   }
 
   .card:hover {
-    transform: translateY(-5px);
+    transform: scale(1.03);
   }
 
   .card img {
     width: 100%;
-    height: 160px;
+    height: 150px;
     object-fit: cover;
     border-radius: 10px;
   }
 
   .card button {
-    margin-top: 10px;
-    padding: 10px;
+    margin-top: 8px;
+    padding: 8px;
     width: 100%;
-    background: linear-gradient(45deg, #28a745, #20c997);
-    color: white;
     border: none;
-    cursor: pointer;
     border-radius: 6px;
-    font-weight: bold;
+    cursor: pointer;
   }
 
+  .add { background: green; color: white; }
+  .view { background: #007bff; color: white; }
+
+  /* CART */
   .cart {
     flex: 1;
     background: white;
     padding: 15px;
     border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
     height: fit-content;
-    position: sticky;
-    top: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
   }
 
   .cart-item {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 10px;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 8px;
+    margin-bottom: 8px;
   }
 
   .remove {
@@ -104,50 +125,49 @@
     cursor: pointer;
   }
 
-  .qty-btn {
-    cursor: pointer;
-    padding: 2px 6px;
-    margin: 0 5px;
-    background: #eee;
-    border-radius: 4px;
-  }
-
-  .total {
-    font-weight: bold;
-    margin-top: 10px;
-  }
-
-  .clear-btn {
-    margin-top: 10px;
+  /* PRODUCT MODAL */
+  .product-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
     width: 100%;
-    padding: 8px;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    justify-content: center;
+    align-items: center;
+  }
+
+  .product-box {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 300px;
+    text-align: center;
+  }
+
+  .close {
+    margin-top: 10px;
     background: crimson;
     color: white;
     border: none;
-    border-radius: 6px;
+    padding: 8px;
+    width: 100%;
     cursor: pointer;
-  }
-
-  .toast {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: #111;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 8px;
-    display: none;
+    border-radius: 6px;
   }
 </style>
 </head>
 
 <body>
 
-<header>🛒 Upgraded E-Commerce Demo</header>
-
-<div class="search-bar">
-  <input type="text" id="search" placeholder="Search products..." oninput="renderProducts()" />
-</div>
+<header>
+  <h2>🛒 Mini E-Commerce</h2>
+  <div class="auth">
+    <span id="userText">Guest</span>
+    <button class="login-btn" onclick="openLogin()">Login</button>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+</header>
 
 <div class="container">
 
@@ -156,13 +176,30 @@
   <div class="cart">
     <h3>Cart</h3>
     <div id="cartItems"></div>
-    <div class="total" id="totalPrice">Total: ₹0</div>
-    <button class="clear-btn" onclick="clearCart()">Clear Cart</button>
+    <h4 id="total">Total: ₹0</h4>
   </div>
 
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- LOGIN -->
+<div class="modal" id="loginModal">
+  <div class="modal-content">
+    <h3>Login</h3>
+    <input id="username" placeholder="Username"/>
+    <input id="password" type="password" placeholder="Password"/>
+    <button onclick="login()">Login</button>
+  </div>
+</div>
+
+<!-- PRODUCT DETAILS -->
+<div class="product-modal" id="productModal">
+  <div class="product-box">
+    <h3 id="pname"></h3>
+    <p id="pprice"></p>
+    <p id="pdesc">Premium quality product with modern design.</p>
+    <button class="close" onclick="closeProduct()">Close</button>
+  </div>
+</div>
 
 <script>
 const products = [
@@ -173,113 +210,106 @@ const products = [
 ];
 
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let user = localStorage.getItem("user");
 
 const productList = document.getElementById("productList");
 const cartItems = document.getElementById("cartItems");
-const totalPrice = document.getElementById("totalPrice");
+const total = document.getElementById("total");
+const userText = document.getElementById("userText");
 
-function saveCart() {
-  localStorage.setItem("cart", JSON.stringify(cart));
+function checkUser() {
+  userText.innerText = user ? "Hi, " + user : "Guest";
+}
+checkUser();
+
+/* LOGIN */
+function openLogin() {
+  document.getElementById("loginModal").style.display = "flex";
 }
 
-// Toast
-function showToast(msg) {
-  const toast = document.getElementById("toast");
-  toast.innerText = msg;
-  toast.style.display = "block";
-  setTimeout(() => toast.style.display = "none", 1500);
+function login() {
+  const u = document.getElementById("username").value;
+  const p = document.getElementById("password").value;
+
+  if (u && p) {
+    user = u;
+    localStorage.setItem("user", u);
+    document.getElementById("loginModal").style.display = "none";
+    checkUser();
+  }
 }
 
-// Render products
+function logout() {
+  localStorage.removeItem("user");
+  user = null;
+  checkUser();
+}
+
+/* PRODUCTS */
 function renderProducts() {
-  const search = document.getElementById("search").value.toLowerCase();
   productList.innerHTML = "";
 
-  products
-    .filter(p => p.name.toLowerCase().includes(search))
-    .forEach(p => {
-      productList.innerHTML += `
-        <div class="card">
-          <img src="${p.img}" />
-          <h4>${p.name}</h4>
-          <p>₹${p.price}</p>
-          <button onclick="addToCart(${p.id})">Add to Cart</button>
-        </div>
-      `;
-    });
+  products.forEach(p => {
+    productList.innerHTML += `
+      <div class="card">
+        <img src="${p.img}" />
+        <h4>${p.name}</h4>
+        <p>₹${p.price}</p>
+
+        <button class="add" onclick="addToCart(${p.id})">Add</button>
+        <button class="view" onclick="viewProduct(${p.id})">View</button>
+      </div>
+    `;
+  });
 }
 
-// Add to cart (with quantity)
+/* CART */
 function addToCart(id) {
-  const product = products.find(p => p.id === id);
-  const item = cart.find(c => c.id === id);
+  if (!user) return alert("Please login first!");
 
-  if (item) {
-    item.qty += 1;
-  } else {
-    cart.push({ ...product, qty: 1 });
-  }
+  const item = products.find(p => p.id === id);
+  cart.push(item);
 
-  saveCart();
-  renderCart();
-  showToast("Added to cart 🛒");
-}
-
-// Remove item
-function removeFromCart(id) {
-  cart = cart.filter(c => c.id !== id);
-  saveCart();
+  localStorage.setItem("cart", JSON.stringify(cart));
   renderCart();
 }
 
-// Quantity update
-function changeQty(id, delta) {
-  const item = cart.find(c => c.id === id);
-  if (!item) return;
-
-  item.qty += delta;
-  if (item.qty <= 0) {
-    cart = cart.filter(c => c.id !== id);
-  }
-
-  saveCart();
+function removeItem(i) {
+  cart.splice(i,1);
+  localStorage.setItem("cart", JSON.stringify(cart));
   renderCart();
 }
 
-// Clear cart
-function clearCart() {
-  cart = [];
-  saveCart();
-  renderCart();
-}
-
-// Render cart
 function renderCart() {
   cartItems.innerHTML = "";
-  let total = 0;
+  let sum = 0;
 
-  cart.forEach(item => {
-    total += item.price * item.qty;
-
+  cart.forEach((c,i) => {
+    sum += c.price;
     cartItems.innerHTML += `
       <div class="cart-item">
-        <div>
-          ${item.name}<br/>
-          ₹${item.price} x ${item.qty}
-        </div>
-
-        <div>
-          <span class="qty-btn" onclick="changeQty(${item.id}, -1)">-</span>
-          <span class="qty-btn" onclick="changeQty(${item.id}, 1)">+</span>
-          <span class="remove" onclick="removeFromCart(${item.id})">X</span>
-        </div>
+        ${c.name} - ₹${c.price}
+        <span class="remove" onclick="removeItem(${i})">X</span>
       </div>
     `;
   });
 
-  totalPrice.innerText = "Total: ₹" + total;
+  total.innerText = "Total: ₹" + sum;
 }
 
+/* PRODUCT DETAILS */
+function viewProduct(id) {
+  const p = products.find(x => x.id === id);
+  document.getElementById("pname").innerText = p.name;
+  document.getElementById("pprice").innerText = "Price: ₹" + p.price;
+  document.getElementById("productModal").style.display = "flex";
+}
+
+function closeProduct() {
+  document.getElementById("productModal").style.display = "none";
+}
+
+/* INIT */
 renderProducts();
 renderCart();
 </script>
